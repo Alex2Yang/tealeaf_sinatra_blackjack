@@ -7,6 +7,7 @@ use Rack::Session::Cookie, :key => 'rack.session',
                            :path => '/',
                            :secret => 'yjdfh432'
 
+MONEY_AMOUNT = 500
 BLACKJACK_AMOUNT = 21
 DEALER_MIN_HIT = 17
 
@@ -58,19 +59,21 @@ helpers do
 
   def loser!(msg)
     @show_player_hit_stay = false
-    @error = "<strong>#{session[:player_name]} loses.</strong> #{msg}"
+    @loser = "<strong>#{session[:player_name]} loses.</strong> #{msg}"
+    session[:money] -= session[:wager]
     once_again
   end
 
   def winner!(msg)
     @show_player_hit_stay = false
-    @success = "<strong>#{session[:player_name]} wins!</strong> #{msg}"
+    @winner = "<strong>#{session[:player_name]} wins!</strong> #{msg}"
+    session[:money] += session[:wager]
     once_again
   end
 
   def tie!(msg)
     @show_player_hit_stay = false
-    @success = "<strong>It's a tie!</strong> #{msg}"
+    @winner = "<strong>It's a tie!</strong> #{msg}"
     once_again
   end
 
@@ -89,23 +92,29 @@ get '/' do
   if !session[:player_name]
     redirect '/new_player'
   else
-    session[:turn] = session[:player_name]
-    redirect '/game'
+    redirect '/bet'
   end
 end
 
 get '/new_player' do
+  session[:money] = MONEY_AMOUNT
   erb :new_player
 end
 
+get '/bet' do
+  session[:wager] = nil
+  session[:turn] = session[:player_name]
+  erb :bet
+end
+
+post '/bet' do
+  session[:wager] = params[:wager].to_i
+  redirect '/game'
+end
+
 post '/new_player' do
-  if !params[:player_name].empty?
-    session[:player_name] = params[:player_name]
-    redirect '/game'
-  else
-    @error = "Please input your name again!"
-    erb :new_player
-  end
+  session[:player_name] = params[:player_name]
+  redirect '/bet'
 end
 
 get '/game' do
@@ -120,6 +129,8 @@ get '/game' do
     session[:player_cards] << session[:deck].pop
     session[:dealer_cards] << session[:deck].pop
   end
+
+  session[:initial_dealing_card] = true
 
   redirect '/game/play'
 end
@@ -151,10 +162,16 @@ get '/game/play' do
 
   end
 
-  erb :game
+  if session[:initial_dealing_card]
+    erb :game
+  else
+    erb :game, layout:false
+  end
+
 end
 
 post '/game/player/hit' do
+  session[:initial_dealing_card] = false
   session[:player_cards] << session[:deck].pop
   redirect '/game/play'
 end

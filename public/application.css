@@ -1,9 +1,9 @@
-form#stay {
+form#stay_form {
   float:left;
   margin-left: 10px;
 }
 
-form#hit {
+form#hit_form {
   float:left;
 }
 
