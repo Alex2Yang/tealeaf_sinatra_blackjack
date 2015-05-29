@@ -1,7 +1,6 @@
 $(document).ready(function() {
   check_player_name();
   check_player_wager();
-  show_error_message();
   player_hit();
   player_stay();
   dealer_hit();
@@ -10,8 +9,8 @@ $(document).ready(function() {
 function check_player_name() {
   $(document).on('click','#sumbit_player_name', function() {
     if($('#player_name').val() == "")
-  {
-    var msg = '<div id="error" class="alert alert-error">Name is required.</div>';
+    {
+    var msg = "Name is required";
     show_error_message(msg);
     $('#player_name').focus();
     return false;
@@ -22,11 +21,12 @@ function check_player_name() {
 function show_error_message(msg) {
   var $form = $('.form');
   var $error_msg = $('#error');
+  var new_msg = "<div id='error' class='alert alert-error'>" + msg + "</div>";
 
   if ($error_msg.length > 0) {
-    $error_msg.replaceWith(msg);
+    $error_msg.replaceWith(new_msg);
   }
-  else $form.before(msg);
+  else $form.before(new_msg);
 }
 
 function check_player_wager() {
@@ -35,14 +35,14 @@ function check_player_wager() {
     var balance = parseInt($('#balance').text());
 
     if(isNaN(player_wager) || player_wager <= 0) {
-      var msg = '<div id="error" class="alert alert-error">Bet must be greater than zero.</div>';
+      var msg = "Bet must be greater than zero.";
       $('#player_wager').focus();
       show_error_message(msg);
       return false;
     }
 
     if (player_wager > balance) {
-      var msg = '<div id="error" class="alert alert-error">Bet amount cannot be greater than what you have.</div>';
+      var msg = "Bet amount cannot be greater than what you have.";
       show_error_message(msg);
       $('#player_wager').focus();
       return false;
