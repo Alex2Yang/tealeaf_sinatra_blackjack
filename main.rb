@@ -108,13 +108,24 @@ get '/bet' do
 end
 
 post '/bet' do
-  session[:wager] = params[:wager].to_i
-  redirect '/game'
+  wager = params[:wager].to_i
+  balance = session[:money]
+
+  if wager > 0 && wager <= balance
+    session[:wager] = wager
+    redirect '/game'
+  else
+     halt erb(:bet)
+  end
 end
 
 post '/new_player' do
-  session[:player_name] = params[:player_name]
-  redirect '/bet'
+  if !params[:player_name].empty?
+    session[:player_name] = params[:player_name]
+    redirect '/bet'
+  else
+    halt erb(:new_player)
+  end
 end
 
 get '/game' do
